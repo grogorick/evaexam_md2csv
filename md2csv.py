@@ -17,7 +17,8 @@ if len(sys.argv) < 2:
     print('Questions (.md) file required as argument')
     exit()
 
-with open(sys.argv[1]) as file:
+filename = sys.argv[1]
+with open(filename) as file:
     lines = file.readlines()
 
 
@@ -32,10 +33,16 @@ for line_no, line in enumerate(lines):
         exit()
 
     if line.startswith('#'):
-        questions.append(current_question := Question())
+        if current_question.question != '':
+            questions.append(current_question := Question())
 
         level = re.match(r'#+[^#]', line).end()
+
         current_dir = current_dir[:level - 1] + [line[level:].strip()]
+        current_question.dir = '###'.join(current_dir)
+
+    elif line.startswith('---'):
+        questions.append(current_question := Question())
         current_question.dir = '###'.join(current_dir)
 
     elif current_question.answers is None and not line.startswith('-'):
@@ -55,11 +62,11 @@ for line_no, line in enumerate(lines):
             current_question.rfs += {'r':'1', 'f':'0'}[line_tmp[0]] + '|'
             current_question.answers.append(line_tmp[1:].strip())
 
+print(f'Found {len(questions)} questions. Generating `{filename}.csv` ...')
 
-with open(sys.argv[1] + '.csv', 'w', newline='') as csvFile:
+with open(filename + '.csv', 'w', newline='') as csvFile:
     writer = csv.writer(csvFile, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
     for q in questions:
-        d, q2, r, a = q
         writer.writerow([
             q.dir,
             8,4,
