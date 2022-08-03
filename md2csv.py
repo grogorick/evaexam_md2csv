@@ -9,8 +9,8 @@ from typing import List
 class Question:
     dir: str = ''
     question: str = ''
-    answers: List[str]|None = None
     rfs: List[str] = []
+    answers: List[str]|None = None
 
 
 if len(sys.argv) < 2:
@@ -25,7 +25,7 @@ questions : List[Question] = [Question()]
 current_dir: List[str] = []
 current_question: Question = questions[0]
 
-for line in lines:
+for line_no, line in enumerate(lines):
     if line.startswith('#'):
         questions.append(current_question := Question())
 
@@ -37,10 +37,20 @@ for line in lines:
         current_question.question += line[1:].strip() + '<br />'
 
     else:
+        if current_question.question == '':
+            print(f'Line {line_no}: ' + line)
+            print('Question required before listing answers.')
+            exit()
         if current_question.answers is None:
             current_question.answers = []
         if line.startswith('-'):
+            if len(current_question.answers) >= 4:
+                print('No more than 4 answers allowed.')
+                exit()
             line = line[1:].strip()
+            if line[0] not in 'rf':
+                print('Answers must start with either `- r ` or `- f `, e.g.: `- r This answer is right.` or `- f This answer is false.`')
+                exit()
             current_question.rfs.append('1' if line[0] == 'r' else ('0' if line[0] == 'f' else None))
             current_question.answers.append(line[1:].strip())
 
