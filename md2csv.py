@@ -26,6 +26,11 @@ current_dir: List[str] = []
 current_question: Question = questions[0]
 
 for line_no, line in enumerate(lines):
+
+    def error(msg: str):
+        print(f'ERROR: {msg}\nin line {line_no}: {line}')
+        exit()
+
     if line.startswith('#'):
         questions.append(current_question := Question())
 
@@ -38,21 +43,17 @@ for line_no, line in enumerate(lines):
 
     else:
         if current_question.question == '':
-            print(f'Line {line_no}: ' + line)
-            print('Question required before listing answers.')
-            exit()
+            error('Question required before listing answers.')
         if current_question.answers is None:
             current_question.answers = []
         if line.startswith('-'):
             if len(current_question.answers) >= 4:
-                print('No more than 4 answers allowed.')
-                exit()
-            line = line[1:].strip()
-            if line[0] not in 'rf':
-                print('Answers must start with either `- r ` or `- f `, e.g.: `- r This answer is right.` or `- f This answer is false.`')
-                exit()
-            current_question.rfs.append('1' if line[0] == 'r' else ('0' if line[0] == 'f' else None))
-            current_question.answers.append(line[1:].strip())
+                error('No more than 4 answers allowed.')
+            line_tmp = line[1:].strip()
+            if line_tmp[0] not in 'rf':
+                error('Answers must start with either `- r ` or `- f `, e.g.: `- r This answer is right.` or `- f This answer is false.`')
+            current_question.rfs.append('1' if line_tmp[0] == 'r' else ('0' if line_tmp[0] == 'f' else None))
+            current_question.answers.append(line_tmp[1:].strip())
 
 
 with open(sys.argv[1] + '.csv', 'w', newline='') as csvFile:
