@@ -46,7 +46,11 @@ for line_no, line in enumerate(lines):
         current_question.dir = '###'.join(current_dir)
 
     elif current_question.answers is None and not line.startswith('-'):
-        current_question.question += line[1:].strip() + '<br />'
+        if current_question.question == '' and line.strip() == '':
+            continue
+        line = re.sub(r'\*\*([^*]+)\*\*', r'<b>\1</b>', line.strip())
+        line = re.sub(r'\*([^*]+)\*', r'<i>\1</i>', line.strip())
+        current_question.question += line + '<br />'
 
     else:
         if current_question.question == '':
@@ -70,7 +74,7 @@ with open(filename + '.csv', 'w', newline='') as csvFile:
         writer.writerow([
             q.dir,
             8,4,
-            q.question + '<br />',
+            q.question,
             '<br />|'.join(q.answers) + '<br />',
             None, None,
             q.rfs + '1',
