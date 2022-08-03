@@ -9,7 +9,7 @@ from typing import List
 class Question:
     dir: str = ''
     question: str = ''
-    rfs: List[str] = ''
+    rfs: str = ''
     answers: List[str]|None = None
 
 
@@ -29,14 +29,15 @@ current_question: Question = questions[0]
 for line_no, line in enumerate(lines):
 
     def error(msg: str):
-        print(f'ERROR: {msg}\nin line {line_no}: {line}')
+        dir = ' # '.join(current_dir)
+        print(f'\nERROR: {msg}\nin: {dir}\nline {line_no}: {line}')
         exit()
 
     if line.startswith('#'):
         if current_question.question != '':
             questions.append(current_question := Question())
 
-        level = re.match(r'#+[^#]', line).end()
+        level = re.match(r'#+[^#]', line).end() - 1
 
         current_dir = current_dir[:level - 1] + [line[level:].strip()]
         current_question.dir = '###'.join(current_dir)
@@ -62,11 +63,12 @@ for line_no, line in enumerate(lines):
                 error('No more than 4 answers allowed.')
             line_tmp = line[1:].strip()
             if line_tmp[0] not in 'rf':
-                error('Answers must start with either `- r ` or `- f `, e.g.: `- r This answer is right.` or `- f This answer is false.`')
+                error('Answers must start with either `- r ` or `- f `\n       e.g.: `- r This answer is right.` or `- f This answer is false.`')
             current_question.rfs += {'r':'1', 'f':'0'}[line_tmp[0]] + '|'
             current_question.answers.append(line_tmp[1:].strip())
 
-print(f'Found {len(questions)} questions. Generating `{filename}.csv` ...')
+
+print(f'Found {len(questions)} questions.\nGenerating `{filename}.csv` ...')
 
 with open(filename + '.csv', 'w', newline='') as csvFile:
     writer = csv.writer(csvFile, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
@@ -75,7 +77,7 @@ with open(filename + '.csv', 'w', newline='') as csvFile:
             q.dir,
             8,4,
             q.question,
-            '<br />|'.join(q.answers) + '<br />',
+            '|'.join(q.answers),
             None, None,
             q.rfs + '1',
             1,0,4,2048
