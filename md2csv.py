@@ -9,7 +9,7 @@ from typing import List
 class Question:
     dir: str = ''
     question: str = ''
-    rfs: List[str] = []
+    rfs: List[str] = ''
     answers: List[str]|None = None
 
 
@@ -52,7 +52,7 @@ for line_no, line in enumerate(lines):
             line_tmp = line[1:].strip()
             if line_tmp[0] not in 'rf':
                 error('Answers must start with either `- r ` or `- f `, e.g.: `- r This answer is right.` or `- f This answer is false.`')
-            current_question.rfs.append('1' if line_tmp[0] == 'r' else ('0' if line_tmp[0] == 'f' else None))
+            current_question.rfs += {'r':'1', 'f':'0'}[line_tmp[0]] + '|'
             current_question.answers.append(line_tmp[1:].strip())
 
 
@@ -66,6 +66,6 @@ with open(sys.argv[1] + '.csv', 'w', newline='') as csvFile:
             q.question + '<br />',
             '<br />|'.join(q.answers) + '<br />',
             None, None,
-            '|'.join(q.rfs) + '|1',
+            q.rfs + '1',
             1,0,4,2048
         ])
