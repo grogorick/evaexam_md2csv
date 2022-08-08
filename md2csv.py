@@ -5,7 +5,7 @@ from io import StringIO
 from re import match, sub
 from shutil import copyfileobj
 from sys import argv
-from typing import List
+from typing import Dict, List
 
 
 class Type(Enum):
@@ -26,6 +26,7 @@ class Question:
     question: str = ''
     rfs: str = ''
     answers: List[str] = None
+    options: Dict = None
 
     _line: int = 0
 
@@ -55,7 +56,7 @@ options = {
 
 print('Parsing questions ...')
 
-for line_no, line in enumerate(lines):
+for line_no, (line, last_line) in enumerate(zip(lines, [''] + lines[:-1])):
     line_empty = line.strip() == ''
     # print(str(line_no+1) + '|\t' + line[:-1])
 
@@ -64,16 +65,19 @@ for line_no, line in enumerate(lines):
         print(f'\nERROR: {msg}\nin: {dir}\nline {line_no+1}: {line}')
         exit()
 
-    # settings
-    if len(current_dir) == 0:
-        option_found = False
+    def parse_option(line: str):
         for key in options:
             key_str = f'*{key}*'
-            if option_found := line.startswith(key_str):
-                options[key] = line[len(key_str):].strip()
-                # print(f'==> {key}: {options[key]}')
-                break
-        if option_found:
+            if line.startswith(key_str):
+                return key, line[len(key_str):].strip()
+        return None, None
+
+    # global options at the beginning of the file
+    if len(current_dir) == 0:
+        key, value = parse_option(line)
+        if key is not None:
+            options[key] = value
+            # print(f'==> {key}: {value}')
             continue
 
     # comments
@@ -84,7 +88,7 @@ for line_no, line in enumerate(lines):
         # print('==> skip comment line')
         continue
 
-    if current_question is None and line_empty:
+    if line_empty and current_question is None:
         # print('==> skip empty line')
         continue
 
@@ -97,13 +101,21 @@ for line_no, line in enumerate(lines):
 
     # question type
     elif line.startswith('>'):
-        questions.append(current_question := Question())
-        current_question._line = line_no
-        current_question.dir = current_dir.copy()
-        current_question.type = Type.fromString(line[1:].strip())
-        # print('==> type ' + current_question.type.name + ' | dir ' + str(current_question.dir))
+        if not last_line.startswith('>'):
+            questions.append(current_question := Question())
+            current_question._line = line_no
+            current_question.dir = current_dir.copy()
+            current_question.type = Type.fromString(line[1:].strip())
+            current_question.options = options.copy()
+            # print('==> type ' + current_question.type.name + ' | dir ' + str(current_question.dir))
+        else:
+            key, value = parse_option(line[1:].lstrip())
+            if key is not None:
+                current_question.options[key] = value
+                # print(f'==> {key}: {value}')
+                continue
 
-    elif current_question.question == '' and line_empty:
+    elif line_empty and current_question.question == '':
         # print('==> skip empty line')
         continue
 
@@ -128,7 +140,7 @@ for line_no, line in enumerate(lines):
                 if line_tmp[0] not in 'rf':
                     error('Answers must start with either `- r ` or `- f `\n       e.g.: `- r This answer is right.` or `- f This answer is false.`')
                 if len(current_question.answers) == 0:
-                    current_question.question += options['kprim_append']
+                    current_question.question += current_question.options['kprim_append']
                 current_question.rfs += {'r':'1', 'f':'0'}[line_tmp[0]] + '|'
                 current_question.answers.append(line_tmp[1:].lstrip())
             else:
