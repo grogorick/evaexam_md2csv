@@ -65,12 +65,15 @@ for line_no, line in enumerate(lines):
 
     # settings
     if len(current_dir) == 0:
+        option_found = False
         for key in options:
             key_str = f'*{key}*'
-            if line.startswith(key_str):
+            if option_found := line.startswith(key_str):
                 options[key] = line[len(key_str):].strip()
                 # print(f'==> {key}: {options[key]}')
-                continue
+                break
+        if option_found:
+            continue
 
     if current_question is None and line_empty:
         # print('==> skip empty line')
