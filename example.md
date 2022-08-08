@@ -33,6 +33,7 @@ cos(0) = 1
 - f Grafikkarten können ausschließlich Dreiecke rasterisieren.
 - r Alle Objektoberflächen werden mit (vielen kleinen) Dreiecken dargestellt.
 
+---
 
 > kprim
 

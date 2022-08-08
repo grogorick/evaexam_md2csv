@@ -21,7 +21,7 @@ A script to convert exam questions in a (specifically structured) Markdown (.md)
  may include markdown syntax for **bold** and **italic** font style.}
 
 ```
-{Comments, e.g. latex formulas that are not supported for import/export.}
+{Multiline comment}
 ```
 
 - {In-/correct answer indicator: r/f} {Multiline text of the first answer.}
@@ -29,6 +29,7 @@ A script to convert exam questions in a (specifically structured) Markdown (.md)
 - {r/f} {Multiline text of the third answer.}
 - {r/f} {Multiline text of the fourth answer.}
 
+---
 
 > {question type of next question within the same topic...}
 
@@ -46,6 +47,12 @@ See [example.md](example.md).
 #### Options (global and per question)
 *kprim_append* — Text to append to questions of type kprim, e.g.:  
    Please state for each of the statements below whether they are true(+) or false(-).
+
+Block comments may be inserted at any point with ` ``` `  
+e.g. to note latex formulas that are not supported for import/export.
+
+Horizontal lines may be inserted at any point with `---`  
+e.g. to separate questions in the same directory.
 
 ### Run
 `python md2csv.py example.md`

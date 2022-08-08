@@ -88,6 +88,10 @@ for line_no, (line, last_line) in enumerate(zip(lines, [''] + lines[:-1])):
         # print('==> skip comment line')
         continue
 
+    if line.strip() == '---':
+        # print('==> skip horizontal line')
+        continue
+
     if line_empty and current_question is None:
         # print('==> skip empty line')
         continue
