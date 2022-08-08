@@ -51,7 +51,7 @@ current_question: Question|None = None
 is_comment: bool = False
 
 options = {
-    'kprim_append': 'Please state for each of the statements below whether they are true(+) or false(-).'
+    'kprim_append': ''
 }
 
 print('Parsing questions ...')
