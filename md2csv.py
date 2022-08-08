@@ -48,7 +48,9 @@ questions : List[Question] = []
 current_dir: List[str] = []
 current_question: Question|None = None
 
-kprim_append = 'Please state for each of the statements below whether they are true(+) or false(-).'
+options = {
+    'kprim_append': 'Please state for each of the statements below whether they are true(+) or false(-).'
+}
 
 print('Parsing questions ...')
 
@@ -63,10 +65,12 @@ for line_no, line in enumerate(lines):
 
     # settings
     if len(current_dir) == 0:
-        if line.startswith('kprim_append'):
-            kprim_append = line[len('kprim_append'):].strip()
-            # print('==> kprim_append ' + kprim_append)
-            continue
+        for key in options:
+            key_str = f'*{key}*'
+            if line.startswith(key_str):
+                options[key] = line[len(key_str):].strip()
+                # print(f'==> {key}: {options[key]}')
+                continue
 
     if current_question is None and line_empty:
         # print('==> skip empty line')
@@ -112,7 +116,7 @@ for line_no, line in enumerate(lines):
                 if line_tmp[0] not in 'rf':
                     error('Answers must start with either `- r ` or `- f `\n       e.g.: `- r This answer is right.` or `- f This answer is false.`')
                 if len(current_question.answers) == 0:
-                    current_question.question += kprim_append
+                    current_question.question += options['kprim_append']
                 current_question.rfs += {'r':'1', 'f':'0'}[line_tmp[0]] + '|'
                 current_question.answers.append(line_tmp[1:].lstrip())
             else:
