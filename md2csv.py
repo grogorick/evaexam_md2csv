@@ -47,6 +47,7 @@ with open(filename) as file:
 questions : List[Question] = []
 current_dir: List[str] = []
 current_question: Question|None = None
+is_comment: bool = False
 
 options = {
     'kprim_append': 'Please state for each of the statements below whether they are true(+) or false(-).'
@@ -56,7 +57,7 @@ print('Parsing questions ...')
 
 for line_no, line in enumerate(lines):
     line_empty = line.strip() == ''
-    # print('\n' + str(line_no+1) + ' ' + line[:-1])
+    # print(str(line_no+1) + '|\t' + line[:-1])
 
     def error(msg: str):
         dir = ' / '.join(current_dir)
@@ -74,6 +75,14 @@ for line_no, line in enumerate(lines):
                 break
         if option_found:
             continue
+
+    # comments
+    if line.startswith('```'):
+        is_comment = not is_comment
+        continue
+    if is_comment:
+        # print('==> skip comment line')
+        continue
 
     if current_question is None and line_empty:
         # print('==> skip empty line')
