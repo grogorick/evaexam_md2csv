@@ -1,4 +1,4 @@
-kprim_append Welche der unten stehenden Aussagen sind richtig(+) und welche falsch(-)?
+*kprim_append* Welche der unten stehenden Aussagen sind richtig(+) und welche falsch(-)?
 
 # ECG
 ## 2022
@@ -9,6 +9,23 @@ kprim_append Welche der unten stehenden Aussagen sind richtig(+) und welche fals
 **Primitives:**
 
 Um Geometrie darstellen zu können, wird diese im Rasterisierer in einzelne Fragmente zerlegt.
+
+``` Formel:
+\[\begin{aligned}
+
+i.\ &
+a^2+b^2=c^2
+\\
+
+ii.\ &
+sin(0) = 0
+\\
+
+ii.\ &
+cos(0) = 1
+
+\end{aligned}\]
+```
 
 - r Der Rasterisierer zerlegt nicht direkt ganze 3D-Modelle in einzelne Pixel,
     sondern die einzelnen geometrischen Primitive (z.B. Dreiecke) aus denen die Modelle zusammengesetzt sind.

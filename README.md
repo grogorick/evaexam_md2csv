@@ -6,8 +6,8 @@ A script to convert exam questions in a (specifically structured) Markdown (.md)
 
 ### Required syntax of the markdown file:
 (Texts in curly braces {like this} are placeholders)
-```
-kprim_append {Text to append to all questions of type kprim}
+~~~
+*{option}* {value for this option, to be applied for all questions}
 
 # {First/top-most questions library directory, e.g. lecture name}
 ## {Second level directory, e.g. year/semester. Optional}
@@ -15,9 +15,14 @@ kprim_append {Text to append to all questions of type kprim}
 {#### ...}
 
 > {question type of first question. Currently supported: kprim}
+> *{option}* {per-question value}
 
 {Multiline question text...
  may include markdown syntax for **bold** and **italic** font style.}
+
+```
+{Comments, e.g. latex formulas that are not supported for import/export.}
+```
 
 - {In-/correct answer indicator: r/f} {Multiline text of the first answer.}
 - {r/f} {Multiline text of the second answer.}
@@ -35,8 +40,12 @@ kprim_append {Text to append to all questions of type kprim}
 > {question type of first question within the new topic...}
 
 {...}
-```
+~~~
 See [example.md](example.md).
+
+#### Options (global and per question)
+*kprim_append* — Text to append to questions of type kprim, e.g.:  
+   Please state for each of the statements below whether they are true(+) or false(-).
 
 ### Run
 `python md2csv.py example.md`
