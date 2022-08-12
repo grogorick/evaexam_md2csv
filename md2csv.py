@@ -41,7 +41,7 @@ if len(argv) < 2:
 
 filename = argv[1]
 print(f'Loading `{filename}` ...')
-with open(filename) as file:
+with open(filename, encoding='utf8') as file:
     lines = file.readlines()
 
 
@@ -193,7 +193,7 @@ with StringIO() as buffer:
 
     print(f'Writing to `{filename}.csv` ...')
 
-    with open(filename + '.csv', 'w', newline='') as csvFile:
+    with open(filename + '.csv', 'w', newline='', encoding='utf8') as csvFile:
         buffer.seek(0)
         copyfileobj(buffer, csvFile)
 
