@@ -49,6 +49,7 @@ questions : List[Question] = []
 current_dir: List[str] = []
 current_question: Question|None = None
 is_comment: bool = False
+is_equation: bool = False
 
 options = {
     'kprim_append': ''
@@ -91,6 +92,14 @@ for line_no, (line, last_line) in enumerate(zip(lines, [''] + lines[:-1])):
         continue
     elif is_comment:
         # print('==> skip comment line')
+        continue
+
+    # equations
+    if line.startswith('$$'):
+        is_equation = not is_equation
+        continue
+    elif is_equation:
+        # print('==> skip equation line')
         continue
 
     # horizontal line to separate questions
