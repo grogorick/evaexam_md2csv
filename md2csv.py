@@ -18,6 +18,18 @@ class Type(Enum):
                 return t
         return None
 
+    def num_question_type(self):
+        return {
+            Type.kprim: 8,
+            Type.single_choice: 10
+        }[self]
+
+    def num_optional_value(self):
+        return {
+            Type.kprim: 2048,
+            Type.single_choice: None
+        }[self]
+
 
 @dataclass
 class Question:
@@ -129,7 +141,7 @@ for line_no, (line, last_line) in enumerate(zip(lines, [''] + lines[:-1])):
             current_question.dir = current_dir.copy()
             current_question.type = Type.fromString(line[1:].strip())
             current_question.options = options.copy()
-            # print('==> type ' + current_question.type.name + ' | dir ' + str(current_question.dir))
+            # print('==> type ' + current_question.type.name + ' | ' + str(current_question.dir))
 
         # per question options
         else:
@@ -163,19 +175,17 @@ for line_no, (line, last_line) in enumerate(zip(lines, [''] + lines[:-1])):
 
     # answers
     else:
+        if current_question.type is None:
+            error('Question type required before specifying answers.')
+        if '|' in line:
+            error('Pipe `|` not allowed in answers.')
         if current_question.type == Type.kprim:
-            if current_question.type is None:
-                error('Question type required before specifying answers.')
-            if '|' in line:
-                error('Pipe `|` not allowed in answers.')
             if line.startswith('-'):
                 if len(current_question.answers) >= 4:
                     error('No more than 4 answers allowed.')
                 line_tmp = line[1:].lstrip()
                 if line_tmp[0] not in 'rf':
                     error('Answers must start with either `- r ` or `- f `\n       e.g.: `- r This answer is right.` or `- f This answer is false.`')
-                if len(current_question.answers) == 0:
-                    current_question.question = current_question.question.strip() + '\n' + current_question.options['kprim_append']
                 current_question.rfs += {'r':'1', 'f':'0'}[line_tmp[0]] + '|'
                 current_question.answers.append(line_tmp[1:].lstrip())
             else:
@@ -204,12 +214,14 @@ with StringIO() as buffer:
                 error('4 answers required.', q)
             writer.writerow([
                 '###'.join(q.dir),
-                8,4,
-                newline_to_br(q.question.strip()),
+                q.type.num_question_type(),
+                len(q.answers),
+                newline_to_br(q.question.strip() + '\n' + current_question.options['kprim_append']),
                 newline_to_br('|'.join([a.strip() for a in q.answers])),
                 None, None,
                 q.rfs + '1',
-                1,0,4,2048
+                1,0,0,
+                q.type.num_optional_value()
             ])
 
     print(f'Writing to `{filename}.csv` ...')
