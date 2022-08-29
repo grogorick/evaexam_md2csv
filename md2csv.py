@@ -146,6 +146,8 @@ for line_no, (line, last_line) in enumerate(zip(lines, [''] + lines[:-1])):
 
     # question text
     elif len(current_question.answers) == 0 and not line.startswith('-'):
+        if line.startswith('<code>') and '</code>' not in line:
+            line = sub(r'^<code>', '<code style="display:block">', line)
         line = sub(r'\*\*([^*]+)\*\*', r'<b>\1</b>', line)
         line = sub(r'\*([^*]+)\*', r'<i>\1</i>', line)
         current_question.question += line
