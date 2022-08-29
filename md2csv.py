@@ -88,7 +88,9 @@ for line_no, (line, last_line) in enumerate(zip(lines, [''] + lines[:-1])):
 
     # comments
     if line.startswith('```'):
-        is_comment = not is_comment
+        # one-line comment
+        if not ( not is_comment and len(line) > 6 and line.rstrip().endswith('```') ):
+            is_comment = not is_comment
         continue
     elif is_comment:
         # print('==> skip comment line')
