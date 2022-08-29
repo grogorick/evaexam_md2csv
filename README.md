@@ -27,7 +27,7 @@ A script to convert exam questions in a (specifically structured) Markdown (.md)
 {Multiline comment}
 ```
 
-- {In-/correct answer indicator: r/f} {Multiline text of the first answer.}
+- {For `kprim` questions, in-/correct answer indicator: r/f} {Multiline text of the first answer.}
 - {r/f} {Multiline text of the second answer.}
 - {r/f} {Multiline text of the third answer.}
 - {r/f} {Multiline text of the fourth answer.}
@@ -36,7 +36,16 @@ A script to convert exam questions in a (specifically structured) Markdown (.md)
 
 > {question type of next question within the same topic...}
 
-{...}
+{question text...}
+
+- {For `single_choice` questions, points: 0/1} {Multiline text of the first answer.}
+- {r/f} {Multiline text of the second answer.}
+- {r/f} {Multiline text of the third answer.}
+- {r/f} {Multiline text of the fourth answer.}
+
+---
+
+> {question type...}
 
 
 ### {next topic}

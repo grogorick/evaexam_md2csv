@@ -10,8 +10,8 @@
 
 Um Geometrie darstellen zu können, wird diese im Rasterisierer in einzelne Fragmente zerlegt.
 
-``` Formel:
-\[\begin{aligned}
+$$ Formel:
+\begin{aligned}
 
 i.\ &
 a^2+b^2=c^2
@@ -24,8 +24,8 @@ sin(0) = 0
 ii.\ &
 cos(0) = 1
 
-\end{aligned}\]
-```
+\end{aligned}
+$$
 
 - r Der Rasterisierer zerlegt nicht direkt ganze 3D-Modelle in einzelne Pixel,
     sondern die einzelnen geometrischen Primitive (z.B. Dreiecke) aus denen die Modelle zusammengesetzt sind.
@@ -35,11 +35,11 @@ cos(0) = 1
 
 ---
 
-> kprim
+> single_choice
 
 **Pixels:**
 
-- f Die Auflösung beim Rasterisieren entspricht immer der des Programmfensters..
-- r Der Rasterisierer läuft zwischen dem Vertex- und Fragment-Shader.
-- f Der Rasterisierer läuft nach dem Fragment-Shader.
-- r Vertex-Attribute werden vom Rasterisierer für jeden einzelnen Pixel interpoliert.
+- 0 Die Auflösung beim Rasterisieren entspricht immer der des Programmfensters.
+- 1 Der Rasterisierer läuft zwischen dem Vertex- und Fragment-Shader.
+- 0 Der Rasterisierer läuft nach dem Fragment-Shader.
+- 1 Vertex-Attribute werden vom Rasterisierer für jeden einzelnen Pixel interpoliert.
