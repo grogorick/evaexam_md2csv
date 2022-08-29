@@ -3,6 +3,7 @@ A script to convert exam questions in a (specifically structured) Markdown (.md)
 
 ### Supported question types:
 - kprim
+- single_choice
 
 ### Required syntax of the markdown file:
 (Texts in curly braces {like this} are placeholders)
@@ -18,7 +19,9 @@ A script to convert exam questions in a (specifically structured) Markdown (.md)
 > *{option}* {per-question value}
 
 {Multiline question text...
- may include markdown syntax for **bold** and **italic** font style.}
+ may include <code>CODE</code> and markdown syntax for **bold** and *italic* font style.}
+
+``` {Single line comment} ```
 
 ```
 {Multiline comment}
