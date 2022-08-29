@@ -10,6 +10,7 @@ from typing import Dict, List
 
 class Type(Enum):
     kprim = 'kprim'
+    single_choice = 'single_choice'
 
     @classmethod
     def fromString(cls, string):
@@ -64,7 +65,8 @@ is_comment: bool = False
 is_equation: bool = False
 
 options = {
-    'kprim_append': ''
+    'kprim_append': '',
+    'single_choice_append': ''
 }
 
 print('Parsing questions ...')
@@ -190,7 +192,17 @@ for line_no, (line, last_line) in enumerate(zip(lines, [''] + lines[:-1])):
                 current_question.answers.append(line_tmp[1:].lstrip())
             else:
                 current_question.answers[-1] += line.lstrip()
-            # print('==> answer ' + current_question.answers[-1])
+        if current_question.type == Type.single_choice:
+            if line.startswith('-'):
+                line_tmp = line[1:].lstrip()
+                points = match(r'([0-9]+)\s+(.+)$', line_tmp)
+                if points is None:
+                    error('Answers must start with their respective points\n       e.g.: `- 1 This answer is right.` or `- 0 This answer is false.`')
+                current_question.rfs += points.group(1) + '|'
+                current_question.answers.append(points.group(2))
+            else:
+                current_question.answers[-1] += line.lstrip()
+        # print('==> answer ' + current_question.answers[-1])
 
 
 print(f'Found {len(questions)} questions.\nRun final checks and convert to CSV ...')
@@ -220,6 +232,20 @@ with StringIO() as buffer:
                 newline_to_br('|'.join([a.strip() for a in q.answers])),
                 None, None,
                 q.rfs + '1',
+                1,0,0,
+                q.type.num_optional_value()
+            ])
+        if q.type == Type.single_choice:
+            if len(q.answers) < 2:
+                error('2 answers required.', q)
+            writer.writerow([
+                '###'.join(q.dir),
+                q.type.num_question_type(),
+                len(q.answers),
+                newline_to_br(q.question.strip() + '\n' + current_question.options['single_choice_append']),
+                newline_to_br('|'.join([a.strip() for a in q.answers])),
+                None, None,
+                q.rfs,
                 1,0,0,
                 q.type.num_optional_value()
             ])
