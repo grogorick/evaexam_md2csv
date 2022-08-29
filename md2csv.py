@@ -150,6 +150,14 @@ for line_no, (line, last_line) in enumerate(zip(lines, [''] + lines[:-1])):
             line = sub(r'^<code>', '<code style="display:block">', line)
         line = sub(r'\*\*([^*]+)\*\*', r'<b>\1</b>', line)
         line = sub(r'\*([^*]+)\*', r'<i>\1</i>', line)
+        line_tmp = None
+        while line_tmp != line:
+            line_tmp = line
+            line = sub(r'^( *)\t', r'\1    ', line_tmp)
+        line_tmp = None
+        while line_tmp != line:
+            line_tmp = line
+            line = sub(r'^((&nbsp;)*) ', r'\1&nbsp;', line_tmp)
         current_question.question += line
         # print('==> question ' + current_question.question)
 
