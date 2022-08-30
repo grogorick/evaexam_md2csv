@@ -5,7 +5,7 @@ from io import StringIO
 from re import match, sub
 from shutil import copyfileobj
 from sys import argv
-from typing import Dict, List
+from typing import Callable, Dict, List
 
 
 class Type(Enum):
@@ -101,9 +101,9 @@ for line_no, (line, last_line) in enumerate(zip(lines, [''] + lines[:-1])):
         continue
 
     # comments
-    if line.startswith('```'):
+    if line.startswith('~~~'):
         # one-line comment
-        if not ( not is_comment and len(line) > 6 and line.rstrip().endswith('```') ):
+        if not ( not is_comment and len(line) > 6 and line.rstrip().endswith('~~~') ):
             is_comment = not is_comment
         continue
     elif is_comment:
@@ -160,18 +160,6 @@ for line_no, (line, last_line) in enumerate(zip(lines, [''] + lines[:-1])):
 
     # question text
     elif len(current_question.answers) == 0 and not line.startswith('-'):
-        if line.startswith('<code>') and '</code>' not in line:
-            line = sub(r'^<code>', '<code style="display:block">', line)
-        line = sub(r'\*\*([^*]+)\*\*', r'<b>\1</b>', line)
-        line = sub(r'\*([^*]+)\*', r'<i>\1</i>', line)
-        line_tmp = None
-        while line_tmp != line:
-            line_tmp = line
-            line = sub(r'^( *)\t', r'\1    ', line_tmp)
-        line_tmp = None
-        while line_tmp != line:
-            line_tmp = line
-            line = sub(r'^((&nbsp;)*) ', r'\1&nbsp;', line_tmp)
         current_question.question += line
         # print('==> question ' + current_question.question)
 
@@ -212,11 +200,27 @@ def error(msg: str, question: Question):
     print(f'\nERROR: {msg}\nin: {dir}\nin question starting at line {question._line+1}')
     exit()
 
-def remove_trailing_brs(string: str):
-    return sub(r'(<br />)+$', '', string)
+def repeat(string: str, operation: Callable):
+    tmp = None
+    while string != tmp:
+        tmp = string
+        string = operation(tmp)
+    return string
 
-def newline_to_br(string: str):
-    return string.replace('\n', '<br />')
+def prepare_html(string: str):
+    code_parts = enumerate(string.split('```'))
+    string = ''.join([
+            ('<pre><code style="display:inline-block">' + code.replace('<', '&lt;').replace('>', '&gt;').strip() + '</code></pre>')
+        if i % 2 else
+            code
+        for i, code in code_parts])
+    ret = ''
+    for line in string.split('\n'):
+        line = sub(r'`([^`]+)`', r'<code>\1</code>', line)
+        line = sub(r'\*\*([^*]+)\*\*', r'<b>\1</b>', line)
+        line = sub(r'(^|[^\\])\*(((?!\\\*).)+)\*', r'\1<i>\2</i>', line)
+        ret += line + '<br>'
+    return ret
 
 with StringIO() as buffer:
     writer = csv_writer(buffer, delimiter=';', quotechar='"', quoting=QUOTE_MINIMAL)
@@ -228,8 +232,8 @@ with StringIO() as buffer:
                 '###'.join(q.dir),
                 q.type.num_question_type(),
                 len(q.answers),
-                newline_to_br(q.question.strip() + '\n' + current_question.options['kprim_append']),
-                newline_to_br('|'.join([a.strip() for a in q.answers])),
+                prepare_html(q.question.strip() + '\n\n' + current_question.options['kprim_append']),
+                '|'.join([prepare_html(a.strip()) for a in q.answers]),
                 None, None,
                 q.rfs + '1',
                 1,0,0,
@@ -242,8 +246,8 @@ with StringIO() as buffer:
                 '###'.join(q.dir),
                 q.type.num_question_type(),
                 len(q.answers),
-                newline_to_br(q.question.strip() + '\n' + current_question.options['single_choice_append']),
-                newline_to_br('|'.join([a.strip() for a in q.answers])),
+                prepare_html(q.question.strip() + '\n\n' + current_question.options['single_choice_append']),
+                '|'.join([prepare_html(a.strip()) for a in q.answers]),
                 None, None,
                 q.rfs,
                 1,0,0,

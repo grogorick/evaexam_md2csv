@@ -1,73 +1,122 @@
 # EvaExam md2csv
 A script to convert exam questions in a (specifically structured) Markdown (.md) file to a (specifically structured) CSV file that can be uploaded/imported to the EvaExam questions library.
 
-### Supported question types:
-- kprim
-- single_choice
-
 ### Required syntax of the markdown file:
 (Texts in curly braces {like this} are placeholders)
-~~~
-*{option}* {value for this option, to be applied for all questions}
-
-# {First/top-most questions library directory, e.g. lecture name}
-## {Second level directory, e.g. year/semester. Optional}
-### {Third level directory, e.g. first topic. Optional}
-{#### ...}
-
-> {question type of first question. Currently supported: kprim}
-> *{option}* {per-question value}
-
-{Multiline question text...
- may include <code>CODE</code> and markdown syntax for **bold** and *italic* font style.}
-
-``` {Single line comment} ```
-
 ```
-{Multiline comment}
+{GLOBAL OPTIONS}
+
+{DIRECTORY}
+
+{QUESTION}
+---
+{QUESTION}
+---
+{QUESTION}
+...
+
+{DIRECTORY}
+
+{QUESTION}
+...
 ```
 
-- {For `kprim` questions, in-/correct answer indicator: r/f} {Multiline text of the first answer.}
-- {r/f} {Multiline text of the second answer.}
-- {r/f} {Multiline text of the third answer.}
-- {r/f} {Multiline text of the fourth answer.}
+> **QUESTION TYPE**
+> ```
+> kprim | single_choice
+> ```
 
----
+> **GLOBAL OPTIONS**
+> ```
+> *{QUESTION TYPE}_{OPTION}* {Global value}
+> *{QUESTION TYPE}_{OPTION}* {Global value}
+> ...
+> ```
 
-> {question type of next question within the same topic...}
+> **OPTION**  
+> `append` — Text to append at the end of the question text, e.g., for kprim questions: "Please state for each of the statements below whether they are true(+) or false(-)."
+>
+> Put global options (with a question type prefix) at the top of the document and per-question options (without the prefix) in the lines following the question type.
 
-{question text...}
+> **DIRECTORY**
+> ```
+> # {First/top-most questions library directory, e.g., lecture name}
+> ## {Second level directory, e.g., year or semester}
+> ### {Third level directory, e.g., topic}
+> ...
+> ```
 
-- {For `single_choice` questions, points: 0/1} {Multiline text of the first answer.}
-- {r/f} {Multiline text of the second answer.}
-- {r/f} {Multiline text of the third answer.}
-- {r/f} {Multiline text of the fourth answer.}
+> **QUESTION**
+> ```
+> > {QUESTION TYPE}
+> > *{OPTION}* {Per-question value}
+> > *{OPTION}* {Per-question value}
+> > ...
+>
+> {Multiline question text}
+>
+> {ANSWER}
+> {ANSWER}
+> ...
+> ```
 
----
+> **ANSWER**  
+>> **kprim:**
+>> ```
+>> - {r | f} {Multiline text of true (r) or false (f) answer}
+>> ```
+>> Exactly 4 answers required
+>
+>> **single_choice:**
+>> ```
+>> - {0 | 1} {Multiline text of right (1) or wrong (0) answer}
+>> ```
+>> At least 2 answers required
+>
+> Subsequent lines of a multiline answer must not start with a hyphen (`-`).
 
-> {question type...}
+> **Comments**
+> ```
+> ~~~ {Single line comment} ~~~
+> ```
+>
+> ```
+> ~~~
+> {Multiline comment}
+> ~~~
+> ```
+> Comments must always be whole line comments.  
+> Completely sripped from the output.  
+> They may be inserted at any point, e.g., to note additional explanations or (filnames of) images that are not supported for import/export directly, but need to be added via the web interface.
 
+> **Math**
+> ```
+> $$
+> a^2 + b^2 = c^2
+> $$
+> ```
+> Completely sripped form the output.  
+> Formulas may be inserted at any point, e.g., to note latex formulas that are not supported for import/export directly, but need to be added via the web interface.
 
-### {next topic}
+> **Additional formatting**  
+> *(As opposed to the web interface, the importer seem to allow arbitrary **html tags** in questions and answers. Keep in mind that this may change anytime, so use the following with caution.)*
+>
+> Questions and answers may include the following markdown formatting:
+> ~~~
+> ```
+> code blocks
+> ```
+>
+> `inline code`
+> **bold**
+> *italic*
+> ~~~
+> Horizontal lines via three hyphens (`---`) may be inserted at any point, e.g., to separate questions in the same directory.
 
-> {question type of first question within the new topic...}
-
-{...}
-~~~
 See [example.md](example.md).
 
-#### Options (global and per question)
-*kprim_append* — Text to append to questions of type kprim, e.g.:  
-   Please state for each of the statements below whether they are true(+) or false(-).
-
-Block comments may be inserted at any point with ` ``` `  
-e.g. to note latex formulas that are not supported for import/export.
-
-Horizontal lines may be inserted at any point with `---`  
-e.g. to separate questions in the same directory.
-
 ### Run
-`python md2csv.py example.md`
+`> {py | python | python3} md2csv.py example.md`
 
 ### Additional notes
 See [EvaExam docs](https://help.evasys.de/evaexam/de/user/index.html#Help=&rhsearch=rtf%20kprim&rhhlterm=rtf%20kprim&rhsyns=%20&t=Help%2FHelp_Text%2FHelp_Text-116.htm) for details on the generated CSV file.
