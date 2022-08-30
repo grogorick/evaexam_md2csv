@@ -1,5 +1,5 @@
 # EvaExam md2csv
-A script to convert exam questions in a (specifically structured) Markdown (.md) file to a (specifically structured) CSV file that can be uploaded/importet to the EvaExam questions library.
+A script to convert exam questions in a (specifically structured) Markdown (.md) file to a (specifically structured) CSV file that can be uploaded/imported to the EvaExam questions library.
 
 ### Supported question types:
 - kprim
