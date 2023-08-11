@@ -21,11 +21,6 @@ A script to convert exam questions in a (specifically structured) Markdown (.md)
 ...
 ```
 
-> **QUESTION TYPE**
-> ```
-> kprim | single_choice
-> ```
-
 > **GLOBAL OPTIONS**
 > ```
 > *{QUESTION TYPE}_{OPTION}* {Global value}
@@ -34,7 +29,8 @@ A script to convert exam questions in a (specifically structured) Markdown (.md)
 > ```
 
 > **OPTION**  
-> `append` — Text to append at the end of the question text, e.g., for kprim questions: "Please state for each of the statements below whether they are true(+) or false(-)."
+> `append` — Text to append at the end of the question text, e.g., for kprim questions: "Please state for each of the statements below whether they are true(+) or false(-)."  
+> `code` — How to handle code (\`\`\`). Allowed values are `as-is`, `exclude`, `inline-html`, or an  `<images-output-directory>`
 >
 > Put global options (with a question type prefix) at the top of the document and per-question options (without the prefix) in the lines following the question type.
 
@@ -58,6 +54,11 @@ A script to convert exam questions in a (specifically structured) Markdown (.md)
 > {ANSWER}
 > {ANSWER}
 > ...
+> ```
+
+> **QUESTION TYPE**
+> ```
+> kprim | single_choice
 > ```
 
 > **ANSWER**  
@@ -111,7 +112,8 @@ A script to convert exam questions in a (specifically structured) Markdown (.md)
 > **bold**
 > *italic*
 > ~~~
-> Horizontal lines via three hyphens (`---`) may be inserted at any point, e.g., to separate questions in the same directory.
+
+> Horizontal lines via three hyphens (`---`) are skipped during processing and may be inserted at any point, e.g., to visually (in the .md file) separate questions in the same directory.
 
 See [example.md](example.md).
 

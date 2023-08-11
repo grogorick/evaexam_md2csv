@@ -6,6 +6,9 @@ from re import match, sub
 from shutil import copyfileobj
 from sys import argv
 from typing import Callable, Dict, List
+from pygments import highlight
+from pygments.formatters import ImageFormatter
+from pygments.lexers import get_lexer_by_name, guess_lexer
 
 
 class Type(Enum):
@@ -31,12 +34,17 @@ class Type(Enum):
             Type.single_choice: None
         }[self]
 
+@dataclass
+class Code:
+    lang: str = ''
+    buffer: str = ''
 
 @dataclass
 class Question:
     dir: List[str] = None
     type: Type|None = None
     question: str = ''
+    code: Code|None = None
     rfs: str = ''
     answers: List[str] = None
     options: Dict = None
@@ -63,10 +71,18 @@ current_dir: List[str] = []
 current_question: Question|None = None
 is_comment: bool = False
 is_equation: bool = False
+is_code: bool = False
+
+class Options(Enum):
+    as_is = 'as-is'
+    exclude = 'exclude'
+    inline_html = 'inline-html'
+    # <png-path>
 
 options = {
     'kprim_append': '',
-    'single_choice_append': ''
+    'single_choice_append': '',
+    'code': Options.as_is,
 }
 
 print('Parsing questions ...')
@@ -75,7 +91,7 @@ for line_no, (line, last_line) in enumerate(zip(lines, [''] + lines[:-1])):
     line_empty = line.strip() == ''
     # print(str(line_no+1) + '|\t' + line[:-1])
 
-    def error(msg: str):
+    def line_error(msg: str):
         dir = ' / '.join(current_dir)
         print(f'\nERROR: {msg}\nin: {dir}\nline {line_no+1}: {line}')
         exit()
@@ -118,18 +134,35 @@ for line_no, (line, last_line) in enumerate(zip(lines, [''] + lines[:-1])):
         # print('==> skip equation line')
         continue
 
+    # code
+    if line.startswith('```') and current_question.options['code'] != Options.as_is:
+        is_code = not is_code
+        if current_question.options['code'] == Options.exclude:
+            continue
+        if is_code and current_question.options['code'] != Options.inline_html:
+            current_question.code = Code()
+            current_question.code.lang = line[3:].strip()
+            continue
+    elif is_code:
+        if current_question.options['code'] == Options.exclude:
+            # print('==> skip code line')
+            continue
+        if current_question.options['code'] != Options.inline_html:
+            current_question.code.buffer += line + '\n'
+            continue
+
     # horizontal line to separate questions
-    elif line.strip() == '---':
+    if line.strip() == '---':
         # print('==> skip horizontal line')
         continue
 
     # empty line
-    elif line_empty and current_question is None:
+    if line_empty and current_question is None:
         # print('==> skip empty line')
         continue
 
     # directory
-    elif line.startswith('#'):
+    if line.startswith('#'):
         level = match(r'#+[^#]', line).end() - 1
         current_dir = current_dir[:level - 1] + [line[level:].strip()]
         current_question = None
@@ -166,16 +199,16 @@ for line_no, (line, last_line) in enumerate(zip(lines, [''] + lines[:-1])):
     # answers
     else:
         if current_question.type is None:
-            error('Question type required before specifying answers.')
+            line_error('Question type required before specifying answers.')
         if '|' in line:
-            error('Pipe `|` not allowed in answers.')
+            line_error('Pipe `|` not allowed in answers.')
         if current_question.type == Type.kprim:
             if line.startswith('-'):
                 if len(current_question.answers) >= 4:
-                    error('No more than 4 answers allowed.')
+                    line_error('No more than 4 answers allowed.')
                 line_tmp = line[1:].lstrip()
                 if line_tmp[0] not in 'rf':
-                    error('Answers must start with either `- r ` or `- f `\n       e.g.: `- r This answer is right.` or `- f This answer is false.`')
+                    line_error('Answers must start with either `- r ` or `- f `\n       e.g.: `- r This answer is right.` or `- f This answer is false.`')
                 current_question.rfs += {'r':'1', 'f':'0'}[line_tmp[0]] + '|'
                 current_question.answers.append(line_tmp[1:].lstrip())
             else:
@@ -185,7 +218,7 @@ for line_no, (line, last_line) in enumerate(zip(lines, [''] + lines[:-1])):
                 line_tmp = line[1:].lstrip()
                 points = match(r'([0-9]+)\s+(.+)$', line_tmp)
                 if points is None:
-                    error('Answers must start with their respective points\n       e.g.: `- 1 This answer is right.` or `- 0 This answer is false.`')
+                    line_error('Answers must start with their respective points\n       e.g.: `- 1 This answer is right.` or `- 0 This answer is false.`')
                 current_question.rfs += points.group(1) + '|'
                 current_question.answers.append(points.group(2))
             else:
@@ -222,9 +255,35 @@ def prepare_html(string: str):
         ret += line + '<br>'
     return ret
 
+def export_code(question: Question, q_num: int):
+    lexer = None
+    try:
+        lexer = get_lexer_by_name(question.code.lang)
+    except:
+        try:
+            lexer = guess_lexer(question.code.buffer)
+        except:
+            error(f'No matching lexer found for code ({question.code.lang})', question)
+    finally:
+        if lexer is not None:
+            file_name = '_'.join([d.replace(' ', '-') for d in question.dir]) + f'_{q_num}.png'
+            file_path = current_question.options['code'] + '/' + file_name
+            try:
+                formatter = ImageFormatter(line_numbers=False)
+                with open(file_path, 'wb+') as f:
+                    highlight(question.code.buffer, lexer, formatter, f)
+            except:
+                error(f'Code export failed', question)
+
+counter = {}
+
 with StringIO() as buffer:
     writer = csv_writer(buffer, delimiter=';', quotechar='"', quoting=QUOTE_MINIMAL)
     for q in questions:
+        q_dir = ' / '.join(q.dir)
+        counter[q_dir] = q_num = counter.get(q_dir, 0) + 1
+        if q.code is not None:
+            export_code(q, q_num)
         if q.type == Type.kprim:
             if len(q.answers) < 4:
                 error('4 answers required.', q)
