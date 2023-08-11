@@ -139,9 +139,10 @@ for line_no, (line, last_line) in enumerate(zip(lines, [''] + lines[:-1])):
         is_code = not is_code
         if current_question.options['code'] == Options.exclude:
             continue
-        if is_code and current_question.options['code'] != Options.inline_html:
-            current_question.code = Code()
-            current_question.code.lang = line[3:].strip()
+        if current_question.options['code'] != Options.inline_html:
+            if is_code:
+                current_question.code = Code()
+                current_question.code.lang = line[3:].strip()
             continue
     elif is_code:
         if current_question.options['code'] == Options.exclude:
